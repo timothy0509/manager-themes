@@ -71,8 +71,8 @@
                     Arial,
                     sans-serif;
                 color: var(--text);
-                font-size: 13px;
-                line-height: 1.5;
+                font-size: 14px;
+                line-height: 1.6;
                 padding: 20px 30px;
                 background: var(--surface);
                 -webkit-font-smoothing: antialiased;
@@ -89,6 +89,7 @@
                 margin-bottom: 18px;
                 padding-bottom: 12px;
                 border-bottom: 4px solid var(--accent);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             }
 
             #business-logo img {
@@ -99,7 +100,7 @@
             }
 
             h1 {
-                font-size: 28px;
+                font-size: 32px;
                 font-weight: 600;
                 color: #111;
                 margin-bottom: 6px;
@@ -201,13 +202,13 @@
                 background: var(--surface);
                 border: 1px solid var(--border);
                 font-size: 12.5px;
-                box-shadow: 0 2px 6px rgba(16, 24, 40, 0.03);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             }
 
             #table-headers th {
                 background: var(--accent);
                 color: #fff;
-                font-weight: 600;
+                font-weight: 700;
                 padding: 12px 14px;
                 text-align: start;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -422,16 +423,21 @@
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
                 }
+                h1 {
+                    font-size: 32px !important;
+                }
                 header {
                     border-bottom: 4px solid var(--accent) !important;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
                 }
                 table table {
                     border: 1px solid var(--border) !important;
-                    box-shadow: none !important;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
                 }
                 #table-headers th {
                     background: var(--accent) !important;
                     color: #fff !important;
+                    font-weight: 700 !important;
                 }
                 #table-rows tr:nth-child(even) td {
                     background: #fbfcfe !important;
