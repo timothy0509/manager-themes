@@ -1,0 +1,739 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Fonts: Inter for Latin (incl. numbers), many Noto Sans families for other scripts.
+         NOTE: Noto Sans Latin NOT imported. -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Bengali:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Telugu:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&family=Noto+Sans+Gujarati:wght@400;700&family=Noto+Sans+Gurmukhi:wght@400;700&family=Noto+Sans+Thai:wght@400;700&family=Noto+Sans+Myanmar:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            :root {
+                --accent: #1a73e8;
+                --accent-700: #1565c0;
+                --accent-100: #e8f0fe;
+                --text: #202124;
+                --muted: #5f6368;
+                --positive: #0f9d58;
+                --positive-700: #0b7a44;
+                --positive-100: rgba(15, 157, 88, 0.08);
+                --positive-border: rgba(15, 157, 88, 0.12);
+                --negative: #d93025;
+                --negative-700: #b1271c;
+                --negative-100: rgba(217, 48, 37, 0.08);
+                --negative-border: rgba(217, 48, 37, 0.12);
+                --border: #e0e0e0;
+                --surface: #ffffff;
+                --radius: 10px;
+                --space-sm: 8px;
+                --space-md: 16px;
+                --space-lg: 24px;
+            }
+
+            @page {
+                margin: 20mm;
+            }
+
+            *,
+            ::after,
+            ::before {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                font-family:
+                    "Inter",
+                    "Noto Sans Arabic",
+                    "Noto Sans Hebrew",
+                    "Noto Sans Devanagari",
+                    "Noto Sans Bengali",
+                    "Noto Sans Tamil",
+                    "Noto Sans Telugu",
+                    "Noto Sans Kannada",
+                    "Noto Sans Gujarati",
+                    "Noto Sans Gurmukhi",
+                    "Noto Sans Thai",
+                    "Noto Sans Myanmar",
+                    "Noto Sans SC",
+                    "Noto Sans JP",
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    "Helvetica Neue",
+                    Arial,
+                    sans-serif;
+                color: var(--text);
+                font-size: 13px;
+                line-height: 1.5;
+                padding: 20px 30px;
+                background: var(--surface);
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: var(--space-lg);
+                margin-bottom: 18px;
+                padding-bottom: 12px;
+                border-bottom: 4px solid var(--accent);
+            }
+
+            #business-logo img {
+                max-height: 92px;
+                max-width: 250px;
+                object-fit: contain;
+                display: block;
+            }
+
+            h1 {
+                font-size: 28px;
+                font-weight: 600;
+                color: #111;
+                margin-bottom: 6px;
+            }
+
+            section {
+                display: flex;
+                margin-bottom: 20px;
+                width: 100%;
+                align-items: flex-start;
+                gap: var(--space-lg);
+            }
+
+            address {
+                font-style: normal;
+                line-height: 1.45;
+                color: var(--muted);
+                unicode-bidi: isolate;
+            }
+
+            #fields {
+                text-align: end;
+                min-width: 170px;
+            }
+            #fields dt {
+                font-weight: 600;
+                color: var(--muted);
+                text-transform: none;
+                font-size: 12px;
+                margin-bottom: 6px;
+                text-align: right;
+            }
+            #fields dd {
+                margin: 0 0 10px 0;
+                font-weight: 700;
+                color: #222;
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+                font-family:
+                    "Inter",
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    "Noto Sans",
+                    "Helvetica Neue",
+                    Arial;
+            }
+
+            #fields-card {
+                background: var(--accent-100);
+                border: 1px solid rgba(26, 115, 232, 0.08);
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0 1px 0 rgba(9, 30, 66, 0.02);
+            }
+
+            .field-em-label {
+                color: var(--muted);
+                font-size: 12px;
+                font-weight: 700;
+            }
+            .field-em-value {
+                color: var(--accent-700);
+                font-size: 16px;
+                font-weight: 900;
+                letter-spacing: 0.2px;
+            }
+
+            #business-info {
+                white-space: nowrap;
+                text-align: right;
+                color: #222;
+                font-weight: 500;
+                unicode-bidi: isolate;
+            }
+
+            .divider {
+                width: 1px;
+                align-self: stretch;
+                border-inline-start: 1px solid #dadce0;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+                margin-bottom: 24px;
+                background: transparent;
+            }
+
+            table table {
+                direction: ltr;
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                border-radius: var(--radius);
+                overflow: hidden;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                font-size: 12.5px;
+                box-shadow: 0 2px 6px rgba(16, 24, 40, 0.03);
+            }
+
+            #table-headers th {
+                background: var(--accent);
+                color: #fff;
+                font-weight: 600;
+                padding: 12px 14px;
+                text-align: start;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                font-size: 13px;
+                unicode-bidi: isolate;
+            }
+
+            table table thead th:first-child {
+                border-top-left-radius: var(--radius);
+            }
+            table table thead th:last-child {
+                border-top-right-radius: var(--radius);
+            }
+
+            #table-rows td,
+            #table-headers th {
+                unicode-bidi: isolate;
+                text-align: start;
+            }
+            #table-rows td {
+                padding: 12px 14px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: top;
+                background: transparent;
+                overflow-wrap: anywhere;
+            }
+            #table-rows tr:nth-child(even) td {
+                background: #fbfcfe;
+            }
+            #table-rows tr.last-row td {
+                border-bottom: 2px solid var(--accent);
+            }
+
+            #table-rows tr.total td {
+                padding: 10px 14px;
+                text-align: end;
+                font-weight: 700;
+                background: #fafafa;
+                color: var(--text);
+            }
+            #table-rows tr.total td:first-child {
+                text-align: end;
+                font-weight: 500;
+                color: var(--muted);
+            }
+            #table-rows tr.total:last-child td {
+                font-size: 15px;
+                font-weight: 900;
+                color: var(--accent);
+                background: transparent;
+                border-top: 2px solid var(--accent);
+            }
+            table table tbody tr.total:last-child td:first-child {
+                border-bottom-left-radius: var(--radius);
+            }
+            table table tbody tr.total:last-child td:last-child {
+                border-bottom-right-radius: var(--radius);
+            }
+
+            td.amount {
+                font-family:
+                    "Inter",
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    "Noto Sans",
+                    "Helvetica Neue",
+                    Arial;
+                font-variant-numeric: tabular-nums;
+                text-align: right;
+                white-space: nowrap;
+                font-weight: 700;
+                direction: ltr;
+            }
+
+            #description {
+                display: none;
+                margin: 0;
+                padding: 0;
+            }
+            #description:not(:empty) {
+                display: block;
+                font-weight: 500;
+                font-size: 14px;
+                margin-bottom: 18px;
+                padding: 8px 12px;
+                color: var(--muted);
+                border-left: 4px solid rgba(26, 115, 232, 0.14);
+                border-radius: 6px;
+                background: transparent;
+                unicode-bidi: isolate;
+            }
+
+            #amount-in-words {
+                border: 1px dotted rgba(26, 115, 232, 0.18);
+                padding: 10px;
+                border-radius: 8px;
+                margin-top: 12px;
+                color: var(--muted);
+                background: rgba(26, 115, 232, 0.02);
+                unicode-bidi: isolate;
+            }
+            #amount-in-words:empty {
+                display: none;
+            }
+
+            #custom-fields {
+                margin-top: 18px;
+                font-size: 12px;
+                color: var(--muted);
+                padding-top: 10px;
+                border-top: 1px dashed #e7e9ee;
+                unicode-bidi: isolate;
+            }
+            #custom-fields strong {
+                color: #111;
+                font-weight: 600;
+            }
+
+            #footers {
+                margin-top: 28px;
+                font-size: 11px;
+                color: var(--muted);
+                text-align: center;
+            }
+
+            #status {
+                text-align: center;
+                margin-top: 30px;
+            }
+            #status span {
+                display: inline-block;
+                padding: 10px 24px;
+                font-size: 14px;
+                font-weight: 700;
+                text-transform: uppercase;
+                border-radius: 999px;
+                letter-spacing: 0.6px;
+                border: 1px solid transparent;
+                background: transparent;
+                color: inherit;
+            }
+            #status span.positive {
+                color: var(--positive-700);
+                background: var(--positive-100);
+                border-color: var(--positive-border);
+            }
+            #status span.negative {
+                color: var(--negative-700);
+                background: var(--negative-100);
+                border-color: var(--negative-border);
+            }
+
+            table,
+            thead,
+            tbody,
+            tr,
+            td,
+            th {
+                -webkit-column-break-inside: avoid;
+                -webkit-page-break-inside: avoid;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            tr.total {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            @media (max-width: 720px) {
+                body {
+                    padding: 12px;
+                    font-size: 12px;
+                }
+                header {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 12px;
+                }
+                section {
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                #fields {
+                    text-align: start;
+                    min-width: auto;
+                }
+                #fields dt,
+                #fields dd {
+                    text-align: start;
+                }
+                #business-info {
+                    text-align: start;
+                    white-space: normal;
+                }
+                #table-headers th,
+                #table-rows td {
+                    padding: 10px;
+                }
+                table table {
+                    border-radius: 8px;
+                }
+            }
+
+            /* --- Force screen styles to apply in print --- */
+            @media print {
+                html,
+                body {
+                    padding: 0 !important;
+                    background: var(--surface) !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                header {
+                    border-bottom: 4px solid var(--accent) !important;
+                }
+                table table {
+                    border: 1px solid var(--border) !important;
+                    box-shadow: none !important;
+                }
+                #table-headers th {
+                    background: var(--accent) !important;
+                    color: #fff !important;
+                }
+                #table-rows tr:nth-child(even) td {
+                    background: #fbfcfe !important;
+                }
+                #description {
+                    border-left: 3px solid #ddd !important;
+                }
+                #fields-card {
+                    border-color: rgba(26, 115, 232, 0.08) !important;
+                    background: var(--accent-100) !important;
+                }
+                #amount-in-words {
+                    border: 1px dotted rgba(26, 115, 232, 0.18) !important;
+                    background: rgba(26, 115, 232, 0.02) !important;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- BODY UNCHANGED -->
+        <table>
+            <thead>
+                <tr>
+                    <td>
+                        <header>
+                            <h1 id="title"></h1>
+                            <div id="business-logo"></div>
+                        </header>
+
+                        <section>
+                            <address
+                                id="recipient-info"
+                                style="flex: 1"
+                            ></address>
+
+                            <div id="fields-card" style="flex: 0 0 auto">
+                                <dl id="fields" style="min-width: 170px"></dl>
+                            </div>
+
+                            <div class="divider" aria-hidden="true"></div>
+
+                            <address id="business-info"></address>
+                        </section>
+
+                        <p id="description"></p>
+                    </td>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>
+                        <table>
+                            <thead>
+                                <tr id="table-headers"></tr>
+                            </thead>
+                            <tbody id="table-rows"></tbody>
+                        </table>
+
+                        <div id="qrcode" style="margin-bottom: 20px"></div>
+
+                        <div id="amount-in-words" aria-hidden="true"></div>
+
+                        <div id="custom-fields"></div>
+                        <div id="footers"></div>
+                        <div
+                            id="status"
+                            style="text-align: center; margin-top: 30px"
+                        ></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script src="resources/qrcode/qrcode.js"></script>
+        <script>
+            // Detect RTL characters
+            const RTL_RE = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+
+            function mapAlignToLogical(align) {
+                if (!align) return "start";
+                const a = String(align).toLowerCase();
+                if (a === "left") return "start";
+                if (a === "right") return "end";
+                if (a === "center") return "center";
+                return "start";
+            }
+
+            window.addEventListener(
+                "message",
+                (event) => {
+                    if (event.source !== window.parent) return;
+                    if (event.data.type !== "context-response") return;
+                    const data = event.data.body || {};
+                    document.documentElement.dir = data.direction || "ltr";
+
+                    document.title = [
+                        data?.business?.name,
+                        data?.title,
+                        data?.reference,
+                    ]
+                        .filter(Boolean)
+                        .join(" - ");
+                    document.getElementById("title").innerHTML =
+                        data.title || "No title";
+                    document.getElementById("description").innerHTML =
+                        data.description || "";
+
+                    const logoContainer =
+                        document.getElementById("business-logo");
+                    logoContainer.innerHTML = "";
+                    if (data.business && data.business.logo) {
+                        const img = document.createElement("img");
+                        img.src = data.business.logo;
+                        logoContainer.appendChild(img);
+                    }
+
+                    const business = data.business || {};
+                    document.getElementById("business-info").innerHTML =
+                        `<strong>${business.name || ""}</strong><br>` +
+                        (business.address
+                            ? business.address.replace(/\n/g, "<br>")
+                            : "");
+
+                    const recipient = data.recipient || {};
+                    document.getElementById("recipient-info").innerHTML =
+                        `<strong>${recipient.name || ""}</strong><br>` +
+                        (recipient.address
+                            ? recipient.address.replace(/\n/g, "<br>")
+                            : "");
+
+                    const fieldsDiv = document.getElementById("fields");
+                    fieldsDiv.innerHTML = "";
+                    (data.fields || []).forEach((f) => {
+                        const dt = document.createElement("dt");
+                        const dd = document.createElement("dd");
+                        const labelText = f.label || "";
+                        const valueText = f.text || "";
+
+                        const isInvoiceLabel =
+                            /invoice|reference|ref(?:erence)?\s?number|invoice\s?number/i.test(
+                                labelText,
+                            );
+                        if (isInvoiceLabel) {
+                            dt.classList.add("field-em-label");
+                            dd.classList.add("field-em-value");
+                        }
+
+                        dt.innerHTML = labelText;
+                        dd.innerHTML = valueText;
+                        fieldsDiv.appendChild(dt);
+                        fieldsDiv.appendChild(dd);
+                    });
+
+                    const headersRow = document.getElementById("table-headers");
+                    headersRow.innerHTML = "";
+                    const columns = (data.table && data.table.columns) || [];
+                    columns.forEach((col) => {
+                        const th = document.createElement("th");
+                        th.innerHTML = col.label;
+                        th.style.textAlign = mapAlignToLogical(col.align);
+                        th.setAttribute("dir", "ltr");
+                        headersRow.appendChild(th);
+                    });
+
+                    const rowsBody = document.getElementById("table-rows");
+                    rowsBody.innerHTML = "";
+                    const rows = (data.table && data.table.rows) || [];
+                    rows.forEach((row) => {
+                        const tr = document.createElement("tr");
+                        tr.className = "row";
+                        row.cells.forEach((cell, i) => {
+                            const col = columns[i] || {};
+                            const td = document.createElement("td");
+                            const raw = cell.text || "";
+
+                            td.innerHTML = raw.split("\n").join("<br />");
+                            td.style.textAlign = mapAlignToLogical(col.align);
+
+                            const isRightAligned =
+                                String(col.align || "").toLowerCase() ===
+                                "right";
+                            if (isRightAligned) {
+                                td.classList.add("amount");
+                                td.setAttribute("dir", "ltr");
+                            } else {
+                                if (RTL_RE.test(raw)) {
+                                    td.setAttribute("dir", "rtl");
+                                } else {
+                                    td.setAttribute("dir", "ltr");
+                                }
+                            }
+
+                            tr.appendChild(td);
+                        });
+                        rowsBody.appendChild(tr);
+                    });
+
+                    const dataRows = rowsBody.querySelectorAll("tr.row");
+                    if (dataRows.length > 0)
+                        dataRows[dataRows.length - 1].classList.add("last-row");
+
+                    ((data.table && data.table.totals) || []).forEach(
+                        (total) => {
+                            const tr = document.createElement("tr");
+                            tr.className = "total";
+                            const tdLabel = document.createElement("td");
+                            tdLabel.innerHTML = total.label;
+                            tdLabel.colSpan = (columns.length || 1) - 1;
+                            const tdValue = document.createElement("td");
+                            tdValue.innerHTML = total.text || "";
+                            tdValue.classList.add("amount");
+                            tdValue.setAttribute("dir", "ltr");
+                            if (total.emphasis) {
+                                tdLabel.style.fontWeight = "bold";
+                                tdValue.style.fontWeight = "bold";
+                            }
+                            tr.appendChild(tdLabel);
+                            tr.appendChild(tdValue);
+                            rowsBody.appendChild(tr);
+                        },
+                    );
+
+                    const amountWordsEl =
+                        document.getElementById("amount-in-words");
+                    let amountWordsText = "";
+                    (data.custom_fields || []).forEach((f) => {
+                        if (
+                            (f.label || "")
+                                .toLowerCase()
+                                .includes("amount in words") ||
+                            (f.label || "")
+                                .toLowerCase()
+                                .includes("amount words")
+                        ) {
+                            amountWordsText = (f.text || "").trim();
+                        }
+                    });
+                    if (!amountWordsText && data.amount_in_words)
+                        amountWordsText = String(data.amount_in_words).trim();
+                    amountWordsEl.textContent = amountWordsText;
+                    if (!amountWordsText || amountWordsText.trim() === "") {
+                        amountWordsEl.style.display = "none";
+                    } else {
+                        amountWordsEl.style.display = "";
+                        amountWordsEl.setAttribute(
+                            "dir",
+                            RTL_RE.test(amountWordsText)
+                                ? "rtl"
+                                : document.documentElement.dir || "ltr",
+                        );
+                    }
+
+                    const customFieldsDiv =
+                        document.getElementById("custom-fields");
+                    customFieldsDiv.innerHTML = "";
+                    (data.custom_fields || []).forEach((f) => {
+                        if (
+                            (f.label || "")
+                                .toLowerCase()
+                                .includes("amount in words") ||
+                            (f.label || "")
+                                .toLowerCase()
+                                .includes("amount words")
+                        )
+                            return;
+                        const div = document.createElement("div");
+                        div.innerHTML = `<strong>${f.label || ""}</strong><br />${(
+                            f.text || ""
+                        )
+                            .split("\n")
+                            .join("<br />")}<br /><br />`;
+                        customFieldsDiv.appendChild(div);
+                    });
+
+                    const footersDiv = document.getElementById("footers");
+                    footersDiv.innerHTML = "";
+                    (data.footers || []).forEach((f) => {
+                        const div = document.createElement("div");
+                        div.innerHTML = f;
+                        footersDiv.appendChild(div);
+                    });
+
+                    const statusDiv = document.getElementById("status");
+                    statusDiv.innerHTML = "";
+                    if (data.emphasis && data.emphasis.text != null) {
+                        const span = document.createElement("span");
+                        span.innerHTML = data.emphasis.text;
+                        if (data.emphasis.positive)
+                            span.classList.add("positive");
+                        if (data.emphasis.negative)
+                            span.classList.add("negative");
+                        statusDiv.appendChild(span);
+                    }
+                },
+                false,
+            );
+
+            window.addEventListener("load", () =>
+                window.parent.postMessage({ type: "context-request" }, "*"),
+            );
+        </script>
+    </body>
+</html>
