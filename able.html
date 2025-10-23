@@ -200,7 +200,10 @@
                 border-radius: var(--radius);
                 overflow: hidden;
                 background: var(--surface);
-                border: 1px solid var(--border);
+                border-top: 1px solid var(--border);
+                border-left: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+                border-bottom: none;
                 font-size: 12.5px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             }
@@ -423,35 +426,103 @@
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
                 }
+                /* Ensure all elements try to preserve print colors */
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
                 h1 {
                     font-size: 32px !important;
                 }
                 header {
                     border-bottom: 4px solid var(--accent) !important;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+                    box-shadow: none !important;
+                    background: transparent !important;
                 }
+                #business-logo img {
+                    max-height: 92px !important;
+                    max-width: 250px !important;
+                }
+                /* Inner table: keep top/side borders but remove the default bottom so
+                   the last-row / total highlight renders as the visible bottom border */
                 table table {
-                    border: 1px solid var(--border) !important;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
+                    border-top: 1px solid var(--border) !important;
+                    border-left: 1px solid var(--border) !important;
+                    border-right: 1px solid var(--border) !important;
+                    border-bottom: none !important;
+                    overflow: visible !important;
+                    box-shadow: none !important;
+                    background: var(--surface) !important;
+                }
+                /* Ensure cell separators and row backgrounds print */
+                #table-rows td {
+                    border-bottom: 1px solid var(--border) !important;
+                    background: transparent !important;
+                }
+                #table-rows tr:nth-child(even) td {
+                    background: #fbfcfe !important;
+                }
+                #table-rows tr.last-row td {
+                    border-bottom: 2px solid var(--accent) !important;
+                    background: transparent !important;
+                }
+                #table-rows tr.total td {
+                    padding: 10px 14px !important;
+                    text-align: end !important;
+                    font-weight: 700 !important;
+                    background: #fafafa !important;
+                    color: var(--text) !important;
+                }
+                #table-rows tr.total:last-child td {
+                    font-size: 15px !important;
+                    font-weight: 900 !important;
+                    color: var(--accent) !important;
+                    background: transparent !important;
+                    border-top: 2px solid var(--accent) !important;
                 }
                 #table-headers th {
                     background: var(--accent) !important;
                     color: #fff !important;
                     font-weight: 700 !important;
+                    -webkit-print-color-adjust: exact !important;
                 }
-                #table-rows tr:nth-child(even) td {
-                    background: #fbfcfe !important;
-                }
+                /* Keep the description, fields card and amount box visible */
                 #description {
-                    border-left: 3px solid #ddd !important;
+                    border-left: 4px solid rgba(26, 115, 232, 0.14) !important;
                 }
                 #fields-card {
                     border-color: rgba(26, 115, 232, 0.08) !important;
                     background: var(--accent-100) !important;
+                    -webkit-print-color-adjust: exact !important;
                 }
                 #amount-in-words {
                     border: 1px dotted rgba(26, 115, 232, 0.18) !important;
                     background: rgba(26, 115, 232, 0.02) !important;
+                }
+                /* Avoid splitting important rows across pages */
+                table, thead, tbody, tr, td, th {
+                    page-break-inside: avoid !important;
+                    -webkit-page-break-inside: avoid !important;
+                }
+                tr.total {
+                    page-break-inside: avoid !important;
+                }
+                /* Preserve corner radii when possible */
+                table table thead th:first-child {
+                    border-top-left-radius: var(--radius) !important;
+                }
+                table table thead th:last-child {
+                    border-top-right-radius: var(--radius) !important;
+                }
+                table table tbody tr.total:last-child td:first-child {
+                    border-bottom-left-radius: var(--radius) !important;
+                }
+                table table tbody tr.total:last-child td:last-child {
+                    border-bottom-right-radius: var(--radius) !important;
+                }
+                /* Force font smoothing in print renderers */
+                body, td, th, h1 {
+                    -webkit-font-smoothing: antialiased !important;
                 }
             }
         </style>
