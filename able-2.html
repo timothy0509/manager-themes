@@ -1,0 +1,992 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Fonts: Inter for Latin (incl. numbers), Noto Sans families for other scripts. -->
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Hebrew:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Sans+Thai:wght@400;600;700&family=Noto+Sans+Myanmar:wght@400;600;700&family=Noto+Sans+SC:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&display=swap"
+    rel="stylesheet"
+/>
+<!--
+  ABLE-2 theme for Manager.io
+  ============================
+  Drop-in replacement for able.html. Same data contract (postMessage
+  context-response), plus support for the newer /api4/view-v1 fetch shape.
+
+  CUSTOMIZE: tweak the --accent and --ink variables below. Everything else
+  follows from those two.
+
+  Deliberate choices vs able.html:
+  - No innerHTML on dynamic data. All business/recipient/field/table text is
+    inserted via textContent, so a stray "<" in an address can't break layout
+    or run scripts. Footer scripts are never executed.
+  - Light table header instead of solid blue. Saves ink, prints cleanly,
+    still clearly branded via the accent rule.
+  - Outer thead/tbody shell kept from default.html so the header block
+    repeats on every printed page for long invoices.
+-->
+<style>
+:root {
+    --accent: #1a73e8;
+    --accent-dark: #0b57d0;
+    --accent-soft: #eef4fe;
+    --ink: #1a1a1a;
+    --muted: #5f6368;
+    --border: #dde1e7;
+    --border-strong: #b9c1cc;
+    --zebra: #f7f9fc;
+    --positive: #0b7a44;
+    --positive-bg: #e7f4ec;
+    --negative: #b1271c;
+    --negative-bg: #fbecea;
+    --radius: 8px;
+}
+
+@page {
+    margin: 20mm;
+}
+
+*, ::after, ::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family:
+        "Inter",
+        "Noto Sans Arabic",
+        "Noto Sans Hebrew",
+        "Noto Sans Devanagari",
+        "Noto Sans Bengali",
+        "Noto Sans Tamil",
+        "Noto Sans Telugu",
+        "Noto Sans Kannada",
+        "Noto Sans Gujarati",
+        "Noto Sans Gurmukhi",
+        "Noto Sans Thai",
+        "Noto Sans Myanmar",
+        "Noto Sans SC",
+        "Noto Sans JP",
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.55;
+    background: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+body {
+    padding: 28px 32px;
+    min-width: 640px;
+}
+
+@media print {
+    body {
+        padding: 0;
+        min-width: auto;
+    }
+}
+
+/* ---------- Header ---------- */
+
+.doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--accent);
+    margin-bottom: 18px;
+}
+
+.doc-titleblock h1 {
+    font-size: 30px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.doc-kicker {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.doc-kicker:empty {
+    display: none;
+}
+
+#business-logo {
+    text-align: end;
+    flex-shrink: 0;
+}
+
+#business-logo img {
+    max-height: 84px;
+    max-width: 240px;
+    object-fit: contain;
+    display: inline-block;
+}
+
+/* ---------- Info section ---------- */
+
+.info {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.info address {
+    font-style: normal;
+    line-height: 1.5;
+}
+
+.info-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.info-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+}
+
+.info-text {
+    color: var(--ink);
+    font-size: 12.5px;
+}
+
+.party {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+#business-info {
+    flex: 0 1 auto;
+    text-align: end;
+    font-size: 12.5px;
+    max-width: 260px;
+}
+
+.meta-card {
+    flex: 0 0 auto;
+    min-width: 190px;
+    max-width: 260px;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+}
+
+.meta-card dl {
+    text-align: end;
+}
+
+.meta-card dt {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1px;
+}
+
+.meta-card dd {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.meta-card dd:last-child {
+    margin-bottom: 0;
+}
+
+.meta-card dd.meta-ref {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent-dark);
+    letter-spacing: 0.01em;
+}
+
+.info-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+/* ---------- Description ---------- */
+
+#description {
+    margin: 0 0 16px 0;
+    padding: 0;
+}
+
+#description:not(:empty) {
+    padding: 8px 12px;
+    border-left: 3px solid var(--accent);
+    background: var(--zebra);
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+}
+
+/* ---------- Line items ---------- */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+table.items {
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+#table-headers th {
+    background: var(--accent-soft);
+    color: var(--ink);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    text-align: start;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--accent);
+    white-space: nowrap;
+}
+
+#table-rows td {
+    padding: 10px 12px;
+    vertical-align: top;
+    text-align: start;
+    border-bottom: 1px solid var(--border);
+    overflow-wrap: anywhere;
+}
+
+#table-rows tr.row:nth-child(even) td {
+    background: var(--zebra);
+}
+
+#table-rows tr.last-row td {
+    border-bottom: 1px solid var(--border-strong);
+}
+
+#table-rows tr.group-row td {
+    background: var(--accent-soft);
+    font-weight: 700;
+    color: var(--accent-dark);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Column subtotal row (rare, only when data provides col.sumText) */
+#table-rows tr.column-total td {
+    font-weight: 700;
+    border-top: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    background: #fff;
+    text-align: right;
+    white-space: nowrap;
+}
+
+td.num, th.num {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Totals */
+#table-rows tr.total td {
+    border-bottom: none;
+    padding: 7px 12px;
+    background: #fff;
+}
+
+#table-rows tr.total td:first-child {
+    text-align: end;
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12.5px;
+}
+
+#table-rows tr.total td:last-child {
+    text-align: end;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    min-width: 130px;
+}
+
+#table-rows tr.grand-total td {
+    border-top: 2px solid var(--accent);
+    padding-top: 10px;
+    padding-bottom: 4px;
+    font-size: 15px;
+}
+
+#table-rows tr.grand-total td:first-child {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+#table-rows tr.grand-total td:last-child {
+    color: var(--accent-dark);
+    font-weight: 800;
+}
+
+tr.total {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* ---------- Below the table ---------- */
+
+#amount-in-words {
+    margin-top: 10px;
+    padding: 9px 12px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    background: #fff;
+}
+
+#amount-in-words:empty {
+    display: none;
+}
+
+#custom-fields {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+#custom-fields .cf {
+    margin-bottom: 10px;
+}
+
+#custom-fields .cf-label {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+#footers {
+    margin-top: 24px;
+    font-size: 11.5px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+}
+
+#footers .footer-item + .footer-item {
+    margin-top: 10px;
+}
+
+#qrcode {
+    margin: 14px 0 0 0;
+}
+
+#qrcode:empty {
+    display: none;
+}
+
+.doc-footer-signoff {
+    margin-top: 36px;
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.doc-footer-signoff .sig {
+    flex: 1 1 0;
+    border-top: 1px solid var(--border-strong);
+    padding-top: 6px;
+    text-align: center;
+}
+
+.doc-footer-signoff:empty {
+    display: none;
+}
+
+/* ---------- Status stamp ---------- */
+
+#status {
+    text-align: center;
+    margin-top: 26px;
+}
+
+#status:empty {
+    display: none;
+}
+
+#status .stamp {
+    display: inline-block;
+    padding: 8px 22px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+    background: #fff;
+}
+
+#status .stamp.positive {
+    color: var(--positive);
+    border-color: var(--positive);
+    background: var(--positive-bg);
+}
+
+#status .stamp.negative {
+    color: var(--negative);
+    border-color: var(--negative);
+    background: var(--negative-bg);
+}
+
+/* Narrow screens: Manager preview pane can be tight */
+@media (max-width: 720px) {
+    body {
+        padding: 14px;
+        min-width: 0;
+    }
+    .doc-header {
+        flex-direction: column;
+    }
+    #business-logo {
+        text-align: start;
+    }
+    .info {
+        flex-direction: column;
+    }
+    #business-info {
+        text-align: start;
+        max-width: none;
+    }
+    .meta-card {
+        max-width: none;
+    }
+    .meta-card dl {
+        text-align: start;
+    }
+    .info-divider {
+        display: none;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Outer shell: thead repeats the header block on every printed page -->
+<table>
+<thead>
+<tr>
+<td>
+    <header class="doc-header">
+        <div class="doc-titleblock">
+            <h1 id="title"></h1>
+            <div class="doc-kicker" id="kicker"></div>
+        </div>
+        <div id="business-logo"></div>
+    </header>
+
+    <section class="info">
+        <address class="party" id="recipient-info"></address>
+        <div class="meta-card">
+            <dl id="fields"></dl>
+        </div>
+        <div class="info-divider" aria-hidden="true"></div>
+        <address id="business-info"></address>
+    </section>
+
+    <p id="description"></p>
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+    <table class="items">
+        <thead>
+            <tr id="table-headers"></tr>
+        </thead>
+        <tbody id="table-rows"></tbody>
+    </table>
+
+    <div id="amount-in-words"></div>
+    <div id="qrcode"></div>
+    <div id="custom-fields"></div>
+    <div id="footers"></div>
+    <div class="doc-footer-signoff" id="signoff" hidden></div>
+    <div id="status"></div>
+</td>
+</tr>
+</tbody>
+</table>
+
+<script src="resources/qrcode/qrcode.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    var RTL_RE = /[֐-ۿﭐ-﷿ﹰ-﻿]/;
+
+    function t(text) {
+        return text === null || text === undefined ? "" : String(text);
+    }
+
+    /* Append plain text, honouring newlines. Never parses HTML. */
+    function appendText(parent, text) {
+        t(text).split("\n").forEach(function (line, i) {
+            if (i > 0) parent.appendChild(document.createElement("br"));
+            parent.appendChild(document.createTextNode(line));
+        });
+    }
+
+    function el(tag, className) {
+        var n = document.createElement(tag);
+        if (className) n.className = className;
+        return n;
+    }
+
+    function logicalAlign(align) {
+        var a = String(align || "").toLowerCase();
+        if (a === "left") return "start";
+        if (a === "right") return "end";
+        return a === "center" ? "center" : "start";
+    }
+
+    function cssAlign(align) {
+        var a = String(align || "").toLowerCase();
+        if (a === "start") return "left";
+        if (a === "end") return "right";
+        if (a === "center" || a === "left" || a === "right") return a;
+        return "left";
+    }
+
+    /* Only http(s) images, plus data: for embedded logos Manager provides. */
+    function safeImageUrl(value) {
+        if (!value) return "";
+        var s = String(value).trim();
+        if (/^data:image\//i.test(s)) return s;
+        try {
+            var u = new URL(s, window.location.origin);
+            if (u.protocol === "http:" || u.protocol === "https:") return u.href;
+        } catch (e) { /* fall through */ }
+        return "";
+    }
+
+    function flattenColumns(columns) {
+        var out = [];
+        (columns || []).forEach(function (c) {
+            if (c && Array.isArray(c.subcolumns) && c.subcolumns.length) {
+                out = out.concat(flattenColumns(c.subcolumns));
+            } else if (c) {
+                out.push(c);
+            }
+        });
+        return out;
+    }
+
+    function isRefLabel(label) {
+        return /invoice\s*(no|number|#)?|reference|ref\.?\s*no|order\s*(no|number)|quote\s*(no|number)/i.test(t(label));
+    }
+
+    function sendResize() {
+        try {
+            window.parent.postMessage({
+                type: "resize",
+                width: document.documentElement.scrollWidth + 1,
+                height: document.documentElement.scrollHeight + 1
+            }, "*");
+        } catch (e) { /* not embedded, ignore */ }
+    }
+
+    function render(data) {
+        data = data || {};
+        document.documentElement.dir = data.direction || "ltr";
+        document.title = [data?.business?.name, data?.title, data?.reference].filter(Boolean).join(" - ");
+
+        /* ---- Header ---- */
+        var titleEl = document.getElementById("title");
+        titleEl.textContent = "";
+        titleEl.appendChild(document.createTextNode(t(data.title) || "No title"));
+
+        var kickerEl = document.getElementById("kicker");
+        kickerEl.replaceChildren();
+        if (Array.isArray(data.subtitles) && data.subtitles.length) {
+            kickerEl.appendChild(document.createTextNode(data.subtitles.map(t).join("  ·  ")));
+        }
+
+        var logoBox = document.getElementById("business-logo");
+        logoBox.replaceChildren();
+        if (data.business && data.business.logo) {
+            var src = safeImageUrl(data.business.logo);
+            if (src) {
+                var img = document.createElement("img");
+                img.src = src;
+                img.alt = t(data.business.name || "Business logo");
+                img.addEventListener("load", sendResize);
+                logoBox.appendChild(img);
+            }
+        }
+
+        /* ---- Parties ---- */
+        var business = data.business || {};
+        var bEl = document.getElementById("business-info");
+        bEl.replaceChildren();
+        var bLabel = el("span", "info-label");
+        bLabel.appendChild(document.createTextNode("From"));
+        bEl.appendChild(bLabel);
+        var bName = el("strong", "info-name");
+        bName.appendChild(document.createTextNode(t(business.name)));
+        bEl.appendChild(bName);
+        var bAddr = el("span", "info-text");
+        appendText(bAddr, business.address || "");
+        bEl.appendChild(bAddr);
+
+        var recipient = data.recipient || null;
+        var rEl = document.getElementById("recipient-info");
+        rEl.replaceChildren();
+        var rLabel = el("span", "info-label");
+        rLabel.appendChild(document.createTextNode(recipient ? "Bill to" : "Issued by"));
+        rEl.appendChild(rLabel);
+        var rName = el("strong", "info-name");
+        rName.appendChild(document.createTextNode(t(recipient ? recipient.name : business.name)));
+        rEl.appendChild(rName);
+        var rAddr = el("span", "info-text");
+        appendText(rAddr, recipient ? (recipient.address || "") : (business.address || ""));
+        rEl.appendChild(rAddr);
+        if (recipient && (recipient.code || recipient.email)) {
+            var rExtra = el("div", "info-text");
+            var bits = [];
+            if (recipient.code) bits.push("Code: " + recipient.code);
+            if (recipient.email) bits.push(recipient.email);
+            appendText(rExtra, bits.join("\n"));
+            rExtra.style.marginTop = "4px";
+            rExtra.style.color = "var(--muted)";
+            rExtra.style.fontSize = "11.5px";
+            rEl.appendChild(rExtra);
+        }
+
+        /* ---- Meta fields ---- */
+        var fieldsEl = document.getElementById("fields");
+        fieldsEl.replaceChildren();
+        var fields = Array.isArray(data.fields) ? data.fields.slice() : [];
+        if (data.reference && !fields.some(function (f) { return f && isRefLabel(f.label); })) {
+            fields.unshift({ label: "Reference", text: data.reference });
+        }
+        fields.forEach(function (f) {
+            if (!f || f.displayAtTheTop === false) return;
+            if (f.label === undefined && f.text === undefined) return;
+            var dt = document.createElement("dt");
+            dt.appendChild(document.createTextNode(t(f.label)));
+            var dd = document.createElement("dd");
+            if (isRefLabel(f.label)) dd.classList.add("meta-ref");
+            appendText(dd, f.text || "");
+            fieldsEl.appendChild(dt);
+            fieldsEl.appendChild(dd);
+        });
+
+        /* ---- Description ---- */
+        var descEl = document.getElementById("description");
+        descEl.textContent = "";
+        var desc = t(data.description) || t(data.table && data.table.description);
+        if (desc) appendText(descEl, desc);
+
+        /* ---- Table ---- */
+        var columns = flattenColumns(data.table && data.table.columns);
+        var headRow = document.getElementById("table-headers");
+        headRow.replaceChildren();
+        columns.forEach(function (col) {
+            var th = document.createElement("th");
+            th.appendChild(document.createTextNode(t(col.label)));
+            th.style.textAlign = logicalAlign(col.align);
+            if (String(col.align || "").toLowerCase() === "right") th.classList.add("num");
+            if (col.minWidth || col.nowrap) {
+                th.style.whiteSpace = "nowrap";
+                th.style.width = col.minWidth ? "1px" : "80px";
+            }
+            headRow.appendChild(th);
+        });
+
+        var body = document.getElementById("table-rows");
+        body.replaceChildren();
+
+        function appendCell(td, cell, col) {
+            if (!cell) return;
+            var align = (col && col.align) || "";
+            td.style.textAlign = logicalAlign(align);
+            if (String(align).toLowerCase() === "right") {
+                td.classList.add("num");
+                td.setAttribute("dir", "ltr");
+            } else if (RTL_RE.test(t(cell.text))) {
+                td.setAttribute("dir", "rtl");
+            }
+            if (cell.image && cell.image.url) {
+                var src = safeImageUrl(cell.image.url);
+                if (src) {
+                    var im = document.createElement("img");
+                    im.src = src;
+                    im.alt = t(cell.text || "");
+                    im.style.maxWidth = "120px";
+                    td.appendChild(im);
+                    return;
+                }
+            }
+            appendText(td, cell.text || "");
+        }
+
+        function renderRow(row) {
+            var cells = (row && row.cells) || [];
+            /* Group header: single cell with nested rows */
+            if (Array.isArray(row.rows) && row.rows.length && cells.length === 1) {
+                var gtr = el("tr", "row group-row");
+                var gtd = document.createElement("td");
+                gtd.colSpan = Math.max(columns.length, 1);
+                appendCell(gtd, cells[0], {});
+                gtr.appendChild(gtd);
+                body.appendChild(gtr);
+                row.rows.forEach(renderRow);
+                return;
+            }
+            var tr = el("tr", "row");
+            if (row && row.isTotalRow) tr.style.fontWeight = "700";
+            cells.forEach(function (cell, i) {
+                var td = document.createElement("td");
+                appendCell(td, cell, columns[i] || {});
+                tr.appendChild(td);
+            });
+            /* Pad short rows so borders stay aligned */
+            for (var p = cells.length; p < columns.length; p++) {
+                tr.appendChild(document.createElement("td"));
+            }
+            body.appendChild(tr);
+            (row.rows || []).forEach(renderRow);
+        }
+
+        ((data.table && data.table.rows) || []).forEach(renderRow);
+
+        var dataRows = body.querySelectorAll("tr.row");
+        if (dataRows.length) dataRows[dataRows.length - 1].classList.add("last-row");
+
+        /* Column totals (old API: col.sumText) */
+        var colTotal = el("tr", "column-total");
+        var hasColTotal = false;
+        columns.forEach(function (col) {
+            var td = document.createElement("td");
+            td.style.textAlign = cssAlign(col.align) === "left" ? "start" : "end";
+            if (col.sumText) {
+                td.appendChild(document.createTextNode(t(col.sumText)));
+                hasColTotal = true;
+            }
+            colTotal.appendChild(td);
+        });
+        if (hasColTotal && columns.length) body.appendChild(colTotal);
+
+        /* Grand totals: last entry gets the accent treatment */
+        var totals = (data.table && data.table.totals) || data.totals || [];
+        totals.forEach(function (total, idx) {
+            if (!total) return;
+            var tr = el("tr", "total");
+            if (idx === totals.length - 1) tr.classList.add("grand-total");
+            var labelTd = document.createElement("td");
+            labelTd.colSpan = Math.max(columns.length - 1, 1);
+            appendText(labelTd, total.label || "");
+            if (total.emphasis) labelTd.style.fontWeight = "700";
+            var valTd = document.createElement("td");
+            valTd.setAttribute("dir", "ltr");
+            appendText(valTd, total.text || "");
+            if (total.key) valTd.id = String(total.key).replace(/[^A-Za-z0-9_-]/g, "");
+            if (total.class) String(total.class).split(/\s+/).slice(0, 3).forEach(function (c) {
+                if (/^[A-Za-z_-][A-Za-z0-9_-]*$/.test(c)) valTd.classList.add(c);
+            });
+            if (total.number !== undefined) valTd.dataset.value = String(total.number);
+            if (total.emphasis) valTd.style.fontWeight = "700";
+            tr.appendChild(labelTd);
+            tr.appendChild(valTd);
+            body.appendChild(tr);
+        });
+
+        /* ---- Amount in words ---- */
+        var wordsEl = document.getElementById("amount-in-words");
+        wordsEl.textContent = "";
+        wordsEl.style.display = "";
+        var words = "";
+        (data.custom_fields || []).concat(Array.isArray(data.fields) ? data.fields : []).forEach(function (f) {
+            if (f && /amount in words|amount words/i.test(t(f.label)) && t(f.text).trim()) {
+                words = t(f.text).trim();
+            }
+        });
+        if (!words && data.amount_in_words) words = t(data.amount_in_words).trim();
+        if (words) {
+            appendText(wordsEl, words);
+            wordsEl.setAttribute("dir", RTL_RE.test(words) ? "rtl" : (document.documentElement.dir || "ltr"));
+        } else {
+            wordsEl.style.display = "none";
+        }
+
+        /* ---- Custom fields (bottom) ---- */
+        var cfBox = document.getElementById("custom-fields");
+        cfBox.replaceChildren();
+        var bottomFields = (data.custom_fields || []).filter(function (f) {
+            return f && !/amount in words|amount words/i.test(t(f.label));
+        });
+        (Array.isArray(data.fields) ? data.fields : []).forEach(function (f) {
+            if (f && f.displayAtTheTop === false) bottomFields.push(f);
+        });
+        bottomFields.forEach(function (f) {
+            if (f.displayAtTheTop) return;
+            var div = el("div", "cf");
+            var lab = el("div", "cf-label");
+            lab.appendChild(document.createTextNode(t(f.label)));
+            div.appendChild(lab);
+            var val = el("div");
+            appendText(val, f.text || "");
+            div.appendChild(val);
+            cfBox.appendChild(div);
+        });
+        /* Business-level custom fields (e.g. VAT number) if the API sends them */
+        if (business.custom_fields && Array.isArray(business.custom_fields)) {
+            business.custom_fields.forEach(function (f) {
+                if (!f || !t(f.text)) return;
+                var div = el("div", "cf");
+                var lab = el("div", "cf-label");
+                lab.appendChild(document.createTextNode(t(f.label || "Business details")));
+                div.appendChild(lab);
+                var val = el("div");
+                appendText(val, f.text || "");
+                div.appendChild(val);
+                cfBox.appendChild(div);
+            });
+        }
+
+        /* ---- Footers: plain text only, scripts never run ---- */
+        var footBox = document.getElementById("footers");
+        footBox.replaceChildren();
+        (data.footers || []).forEach(function (f) {
+            var div = el("div", "footer-item");
+            appendText(div, t(f).replace(/<[^>]*>/g, "").trim());
+            if (div.textContent.trim()) footBox.appendChild(div);
+        });
+
+        /* ---- Status stamp: old `emphasis` or new `status` shape ---- */
+        var stBox = document.getElementById("status");
+        stBox.replaceChildren();
+        var stampText = null, tone = "";
+        if (data.emphasis && data.emphasis.text != null) {
+            stampText = t(data.emphasis.text);
+            tone = data.emphasis.positive ? "positive" : (data.emphasis.negative ? "negative" : "");
+        } else if (data.status && data.status.text) {
+            stampText = t(data.status.text);
+            tone = /positive|paid|approved/i.test(t(data.status.tone)) ? "positive"
+                : /negative|void|cancel|overdue|unpaid/i.test(t(data.status.tone) + " " + stampText) ? "negative" : "";
+        }
+        if (stampText) {
+            var stamp = el("span", "stamp" + (tone ? " " + tone : ""));
+            stamp.appendChild(document.createTextNode(stampText));
+            stBox.appendChild(stamp);
+        }
+
+        /* ---- Saudi e-invoicing QR (legacy field, guarded) ---- */
+        var qrBox = document.getElementById("qrcode");
+        qrBox.replaceChildren();
+        if (data.legacyQrCodeForSaudiArabia && typeof QRCode !== "undefined") {
+            try {
+                var bytes = [];
+                var enc = new TextEncoder();
+                var vatNum = "0000000000000";
+                var vatField = (business.custom_fields || []).find(function (x) {
+                    return x && x.key === "d96d97e8-c857-42c6-8360-443c06a13de9";
+                });
+                if (vatField) vatNum = t(vatField.text);
+                var stamp_ms = new Date((data.timestamp - 621355968000000000) / 10000).toISOString();
+                var totalEl = document.querySelector("[data-value]");
+                var grand = 0, vat = 0;
+                var tEl = document.getElementById("Total");
+                if (tEl) grand = parseFloat(tEl.getAttribute("data-value")) || 0;
+                Array.prototype.forEach.call(document.getElementsByClassName("taxAmount"), function (n) {
+                    vat += parseFloat(n.getAttribute("data-value")) || 0;
+                });
+                [[1, t(business.name || "No name")], [2, vatNum], [3, stamp_ms],
+                 [4, grand.toFixed(2)], [5, vat.toFixed(2)]].forEach(function (pair) {
+                    var b = enc.encode(pair[1]);
+                    bytes.push(pair[0], b.length);
+                    b.forEach(function (x) { bytes.push(x); });
+                });
+                new QRCode(qrBox, {
+                    text: btoa(String.fromCharCode.apply(null, bytes)),
+                    width: 128, height: 128,
+                    colorDark: "#000000", colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            } catch (e) { /* QR is optional, never break the invoice */ }
+        }
+
+        sendResize();
+    }
+
+    /* Old embedding: data arrives via postMessage */
+    window.addEventListener("message", function (event) {
+        if (event.source !== window.parent) return;
+        if (!event.data || event.data.type !== "context-response") return;
+        render(event.data.body);
+    }, false);
+
+    /* New embedding: theme fetches its own view data */
+    function tryFetch() {
+        if (!window.location.search) return;
+        if (typeof fetch !== "function") return;
+        fetch("/api4/view-v1" + window.location.search, {
+            headers: { "Accept": "application/json" },
+            credentials: "same-origin"
+        }).then(function (res) {
+            if (!res.ok) throw new Error("view fetch failed");
+            return res.json();
+        }).then(render).catch(function () { /* postMessage path will handle it */ });
+    }
+
+    window.addEventListener("load", function () {
+        tryFetch();
+        try {
+            window.parent.postMessage({ type: "context-request" }, "*");
+        } catch (e) { /* standalone preview */ }
+    });
+})();
+</script>
+</body>
+</html>
