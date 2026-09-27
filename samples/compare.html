@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Theme comparison - invoice sample</title>
+<script src="sample-body.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a1a;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: #666; font-size: 13px; margin-bottom: 20px; }
+  .theme-block { margin-bottom: 48px; }
+  .theme-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #555;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .frame-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  iframe {
+    width: 100%;
+    border: none;
+    display: block;
+    background: #fff;
+  }
+</style>
+</head>
+<body>
+  <h1>Manager theme comparison</h1>
+  <p class="sub">Same sample invoice rendered in each theme. Frames auto-size via the theme resize message.</p>
+
+  <div class="theme-block">
+    <div class="theme-label">default.html</div>
+    <div class="frame-wrap"><iframe id="f-default" title="default theme"></iframe></div>
+  </div>
+  <div class="theme-block">
+    <div class="theme-label">able.html (current)</div>
+    <div class="frame-wrap"><iframe id="f-able" title="able theme"></iframe></div>
+  </div>
+  <div class="theme-block">
+    <div class="theme-label">able-2.html (new)</div>
+    <div class="frame-wrap"><iframe id="f-able2" title="able-2 theme"></iframe></div>
+  </div>
+
+<script>
+  var THEMES = [
+    ["f-default", "../default.html"],
+    ["f-able", "../able.html"],
+    ["f-able2", "../able-2.html"]
+  ];
+
+  window.addEventListener("message", function (event) {
+    if (event.data && event.data.type === "resize" && event.source) {
+      var frames = document.querySelectorAll("iframe");
+      for (var i = 0; i < frames.length; i++) {
+        if (frames[i].contentWindow === event.source && event.data.height) {
+          frames[i].style.height = Math.min(event.data.height, 3000) + "px";
+        }
+      }
+    }
+  });
+
+  THEMES.forEach(function (pair) {
+    var frame = document.getElementById(pair[0]);
+    frame.style.height = "900px";
+    frame.src = pair[1];
+    frame.addEventListener("load", function handler() {
+      frame.removeEventListener("load", handler);
+      /* Old contract: theme asks for context, we answer. Delay so the
+         theme's own load listener registers first. */
+      setTimeout(function () {
+        frame.contentWindow.postMessage(
+          { type: "context-response", body: SAMPLE_BODY }, "*");
+      }, 400);
+    });
+  });
+</script>
+</body>
+</html>
